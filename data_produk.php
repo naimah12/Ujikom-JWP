@@ -130,9 +130,6 @@ if (isset($_GET['hapus'])) {
             <div class="left">
                 <button onclick="showForm('tambah')">Tambah</button>
             </div>
-            <div class="right">
-                <input type="text" placeholder="Cari">
-            </div>
         </div>
 
         <!-- Form Tambah/Edit -->
