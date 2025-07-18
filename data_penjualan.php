@@ -61,6 +61,16 @@ if (file_exists($data_produk_file)) {
 // var_dump($produk_list);
 // echo "</pre>";
 
+// Fungsi untuk menyimpan array data kembali ke file CSV
+function saveToCSV($data, $file_path) {
+    $file = fopen($file_path, 'w');// Buka file dalam mode tulis (overwrite)
+    fputcsv($file, ['tanggal', 'nama_produk', 'item_terjual', 'total_penjualan']); // Tulis baris header
+    foreach ($data as $row) {
+        fputcsv($file, $row);  // Tulis tiap baris data
+    }
+    fclose($file);// Tutup file setelah selesai menulis
+}
+
 // ==================== HANDLE ACTION ====================
 if (isset($_POST['tambah'])) {
     // echo "<pre>POST TAMBAH:\n";
