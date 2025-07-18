@@ -203,6 +203,7 @@ function klasifikasiPenjualan($nilai) {
             </tr>
             <?php foreach ($data as $i => $row): ?>
                 <tr>
+                    <td><?= $i + 1 ?></td> <!-- Nomor urut -->
                     <td><?= htmlspecialchars($row[0]) ?></td> <!-- Tanggal -->
                     <td><?= htmlspecialchars($row[1]) ?></td> <!-- Nama produk -->
                     <td><?= htmlspecialchars($row[2]) ?></td> <!-- Item terjual -->
