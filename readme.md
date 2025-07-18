@@ -8,12 +8,6 @@ Niaga_Mandiri/
 ├── style.css               # (Opsional) CSS untuk styling
 └── README.md               # Dokumentasi ini
 
-## 📝 Aturan Pengembangan
-
-> Peraturan untuk melanjutkan atau mengerjakan aplikasi penjualan:
-
-1. **Tiap fungsi atau atribut wajib menggunakan _camelCase_**
-
 ## ISI ##
 1. Terdapat fungsi CRUD di proses.php
 
