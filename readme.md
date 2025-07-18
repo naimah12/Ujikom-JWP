@@ -6,7 +6,7 @@ Niaga_Mandiri/
 ├── proses.php              # Berisi fungsi-fungsi CRUD kategori, produk,penjualan
 ├── data_kategori.php       # Halaman utama tampilan kategori
 ├── style.css               # (Opsional) CSS untuk styling
-└── README.md               # Dokumentasi ini
+└── README.md               # Dokumentasi ini 
 
 ## ISI ##
 1. Terdapat fungsi CRUD di proses.php
