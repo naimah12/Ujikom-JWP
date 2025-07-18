@@ -1,74 +1,89 @@
 <?php
-include 'proses.php';
+include 'proses.php'; // Include fungsi CRUD dari file proses.php
 
-$csv_file = 'data/data_penjualan.csv';
-$data_produk_file = 'data/data_produk.csv';
-$data = [];
+$csv_file = 'data/data_penjualan.csv';        // File data penjualan
+$data_produk_file = 'data/data_produk.csv';   // File data produk
+$data = []; // Inisialisasi array data penjualan
 
+// Ambil parameter pencarian (jika ada) dari URL
 $search_nama = $_GET['search_nama'] ?? '';
 $search_tanggal = $_GET['search_tanggal'] ?? '';
 
+// Inisialisasi array produk
 $produk_list = [];
 
-$search_nama = $_GET['search_nama'] ?? '';
-$search_tanggal = $_GET['search_tanggal'] ?? '';
+// DEBUG: tampilkan parameter pencarian
+// echo "<pre>DEBUG GET:\n";
+// var_dump($_GET);
+// echo "</pre>";
 
-$data = []; // inisialisasi
-
-// Baca data penjualan dari CSV
+// ==================== BACA DATA PENJUALAN ====================
 if (file_exists($csv_file)) {
     $file = fopen($csv_file, 'r');
-    $header = fgetcsv($file); // skip header
+    $header = fgetcsv($file); // Lewati baris header
     while (($row = fgetcsv($file)) !== false) {
         $data[] = $row;
     }
     fclose($file);
 }
 
-// FILTER dilakukan data terisi
+// DEBUG: tampilkan data awal sebelum filter
+// echo "<pre>DATA AWAL PENJUALAN:\n";
+// var_dump($data);
+// echo "</pre>";
+
+// ==================== FILTER DATA ====================
 if ($search_nama || $search_tanggal) {
     $data = array_filter($data, function ($row) use ($search_nama, $search_tanggal) {
-        $match_nama = $search_nama ? stripos($row[1], $search_nama) !== false : true;
-        $match_tanggal = $search_tanggal ? $row[0] === $search_tanggal : true;
+        $match_nama = $search_nama ? stripos($row[1], $search_nama) !== false : true; // cocok nama
+        $match_tanggal = $search_tanggal ? $row[0] === $search_tanggal : true;        // cocok tanggal
         return $match_nama && $match_tanggal;
     });
 }
 
-// Baca nama produk dari data_produk.csv
+// DEBUG: tampilkan data setelah filter
+// echo "<pre>DATA SETELAH FILTER:\n";
+// var_dump($data);
+// echo "</pre>";
+
+// ==================== BACA LIST PRODUK ====================
 if (file_exists($data_produk_file)) {
     $file = fopen($data_produk_file, 'r');
-    fgetcsv($file); // skip header
+    fgetcsv($file); // Lewati header
     while (($row = fgetcsv($file)) !== false) {
-        $produk_list[] = $row[0]; // Ambil nama_produk
+        $produk_list[] = $row[0]; // Ambil hanya nama_produk
     }
     fclose($file);
 }
 
-// Simpan data ke CSV
-function saveToCSV($data, $file_path) {
-    $file = fopen($file_path, 'w');
-    fputcsv($file, ['tanggal', 'nama_produk', 'item_terjual', 'total_penjualan']);
-    foreach ($data as $row) {
-        fputcsv($file, $row);
-    }
-    fclose($file);
-}
+// DEBUG: tampilkan daftar produk
+// echo "<pre>LIST PRODUK:\n";
+// var_dump($produk_list);
+// echo "</pre>";
 
-// Tambah
+// ==================== HANDLE ACTION ====================
 if (isset($_POST['tambah'])) {
+    // echo "<pre>POST TAMBAH:\n";
+    // var_dump($_POST);
+    // echo "</pre>";
     tambahPenjualan($data, $csv_file, $_POST);
 }
 
-// Edit
 if (isset($_POST['simpan_edit'])) {
+    // echo "<pre>POST EDIT:\n";
+    // var_dump($_POST);
+    // echo "</pre>";
     editPenjualan($data, $csv_file, $_POST);
 }
 
-// Hapus
 if (isset($_GET['hapus'])) {
+    // echo "<pre>HAPUS INDEX:\n";
+    // var_dump($_GET['hapus']);
+    // echo "</pre>";
     hapusPenjualan($data, $csv_file, $_GET['hapus']);
 }
 
+// ==================== FUNSI KLASIFIKASI ====================
 function klasifikasiPenjualan($nilai) {
     if ($nilai > 100000000) return 'Sangat Tinggi';
     elseif ($nilai > 50000000) return 'Sedang';
@@ -88,30 +103,34 @@ function klasifikasiPenjualan($nilai) {
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
     
 <title>Data Penjualan</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css"><!-- Menghubungkan dengan file CSS -->
     <script>
+        // Fungsi untuk menampilkan form (tambah/edit)
         function showForm(mode, index = null) {
-            document.getElementById('form-container').style.display = 'block';
-            const form = document.forms['formPenjualan'];
+            document.getElementById('form-container').style.display = 'block';// Tampilkan form
+            const form = document.forms['formPenjualan']; // Ambil form berdasarkan atribut name
+
             if (mode === 'tambah') {
-                form.reset();
-                form.index.value = '';
-                document.getElementById('form-title').innerText = 'Tambah Data Penjualan';
-                document.getElementById('simpan-tambah').style.display = 'inline-block';
-                document.getElementById('simpan-edit').style.display = 'none';
+                form.reset(); // Kosongkan form
+                form.index.value = '';// Kosongkan input hidden index
+                document.getElementById('form-title').innerText = 'Tambah Data Penjualan';// Ganti judul form
+                document.getElementById('simpan-tambah').style.display = 'inline-block';// Tampilkan tombol Tambah
+                document.getElementById('simpan-edit').style.display = 'none';// Sembunyikan tombol Simpan
+
             } else if (mode === 'edit') {
-                const data = JSON.parse(document.getElementById('data-' + index).textContent);
-                form.tanggal.value = data[0];
-                form.nama_produk.value = data[1];
-                form.item_terjual.value = data[2];
-                form.total_penjualan.value = data[3];
-                form.index.value = index;
-                document.getElementById('form-title').innerText = 'Edit Data Penjualan';
-                document.getElementById('simpan-tambah').style.display = 'none';
-                document.getElementById('simpan-edit').style.display = 'inline-block';
+                const data = JSON.parse(document.getElementById('data-' + index).textContent); // Ambil data JSON dari baris
+                // Isi form dengan data kategori yang akan diedit
+                form.tanggal.value = data[0]; //tanggal
+                form.nama_produk.value = data[1]; //nama produk
+                form.item_terjual.value = data[2]; //item terjual
+                form.total_penjualan.value = data[3]; //total penjualan
+                form.index.value = index; // Isi input hidden index
+                document.getElementById('form-title').innerText = 'Edit Data Penjualan';// Ganti judul form
+                document.getElementById('simpan-tambah').style.display = 'none';// Sembunyikan tombol Tambah
+                document.getElementById('simpan-edit').style.display = 'inline-block'; // Tampilkan tombol Simpan
             }
         }
-
+        // Fungsi untuk menyembunyikan form
         function hideForm() {
             document.getElementById('form-container').style.display = 'none';
         }
@@ -133,6 +152,7 @@ function klasifikasiPenjualan($nilai) {
             <button onclick="showForm('tambah')">Tambah</button>
         </div>
 
+        <!-- Form Filter -->
         <form method="get" style="display: flex; gap: 10px; align-items: center; margin-bottom: 20px;">
             <input type="text" name="search_nama" placeholder="Nama Produk" value="<?= htmlspecialchars($search_nama) ?>">
             <input type="date" name="search_tanggal" value="<?= htmlspecialchars($search_tanggal) ?>">
@@ -140,6 +160,7 @@ function klasifikasiPenjualan($nilai) {
             <a href="data_penjualan.php" style="margin-left: 5px;">Reset</a>
         </form>
 
+        <!-- Form Tambah/Edit -->
         <div id="form-container" style="display:none; margin-bottom:20px;">
             <h3 id="form-title">Tambah Data Penjualan</h3>
             <form name="formPenjualan" method="post">
@@ -172,17 +193,18 @@ function klasifikasiPenjualan($nilai) {
             </tr>
             <?php foreach ($data as $i => $row): ?>
                 <tr>
-                    <td><?= $i + 1 ?></td>
-                    <td><?= htmlspecialchars($row[0]) ?></td>
-                    <td><?= htmlspecialchars($row[1]) ?></td>
-                    <td><?= htmlspecialchars($row[2]) ?></td>
-                    <td><?= htmlspecialchars($row[3]) ?></td>
-                    <td><?= klasifikasiPenjualan((int)$row[3]) ?></td>
+                    <td><?= htmlspecialchars($row[0]) ?></td> <!-- Tanggal -->
+                    <td><?= htmlspecialchars($row[1]) ?></td> <!-- Nama produk -->
+                    <td><?= htmlspecialchars($row[2]) ?></td> <!-- Item terjual -->
+                    <td><?= htmlspecialchars($row[3]) ?></td> <!-- Total penjualan -->
+                    <td><?= klasifikasiPenjualan((int)$row[3]) ?></td> <!-- Keterangan -->
                 <td>
                     <div class="btn-group" role="group" aria-label="Aksi">
+                        <!-- Button Edit-->
                         <button type="button" class="btn btn-sm btn-warning" onclick="showForm('edit', <?= $i ?>)">
                             <i class="bi bi-pencil-fill"></i> Edit
                         </button>
+                         <!-- Button Hapus-->
                         <a href="?hapus=<?= $i ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin hapus?')">
                             <i class="bi bi-trash-fill"></i> Hapus
                         </a>
@@ -190,6 +212,7 @@ function klasifikasiPenjualan($nilai) {
                 </td>
 
                 </tr>
+                <!-- Simpan data per baris sebagai script JSON agar bisa dipanggil JS -->
                 <script>
                     document.write(`<script id="data-<?= $i ?>" type="application/json"><?= json_encode($row) ?><\/script>`);
                 </script>

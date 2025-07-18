@@ -16,6 +16,11 @@ $data = []; // Inisialisasi array untuk menampung data dari CSV
         fclose($file);                           // Tutup file setelah selesai
     }
 
+// DEBUG: Lihat isi array hasil pembacaan CSV
+// echo "<pre>DATA DARI CSV:\n";
+// var_dump($data);
+// echo "</pre>";
+
 // Fungsi untuk menyimpan array data kembali ke file CSV
 function saveToCSV($data, $file_path) {
     $file = fopen($file_path, 'w');          // Buka file dalam mode tulis (overwrite)
@@ -28,16 +33,25 @@ function saveToCSV($data, $file_path) {
 
     // Menangani aksi tambah data
 if (isset($_POST['tambah'])) {
+     // echo "<pre>POST TAMBAH:\n";
+    // var_dump($_POST);
+    // echo "</pre>";
     tambahKategori($data, $csv_file, $_POST['nama_kategori']);
 }
 
 // Menangani aksi edit data
 if (isset($_POST['simpan_edit'])) {
+       // echo "<pre>POST EDIT:\n";
+    // var_dump($_POST);
+    // echo "</pre>";
     editKategori($data, $csv_file, $_POST['index'], $_POST['nama_kategori']);
 }
 
 // Menangani aksi hapus data
 if (isset($_GET['hapus'])) {
+      // echo "<pre>HAPUS INDEX:\n";
+    // var_dump($_GET['hapus']);
+    // echo "</pre>";
     hapusKategori($data, $csv_file, $_GET['hapus']);
 }
 ?>
@@ -126,19 +140,22 @@ if (isset($_GET['hapus'])) {
         </tr>
         <?php foreach ($data as $i => $row): ?>
             <tr>
-                <td><?= $i + 1 ?></td>
-                <td><?= htmlspecialchars($row[0]) ?></td>
+                <td><?= $i + 1 ?></td> <!-- Nomor urut -->
+                <td><?= htmlspecialchars($row[0]) ?></td> <!-- Nama kategori -->
                 <td>
                     <div class="btn-group" role="group" aria-label="Aksi">
+                         <!-- Button Edit-->
                         <button type="button" class="btn btn-sm btn-warning" onclick="showForm('edit', <?= $i ?>)">
                             <i class="bi bi-pencil-fill"></i> Edit
                         </button>
+                        <!-- Button Hapus-->
                         <a href="?hapus=<?= $i ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin hapus?')">
                             <i class="bi bi-trash-fill"></i> Hapus
                         </a>
                     </div>
                 </td>
             </tr>
+            <!-- Simpan data per baris sebagai script JSON agar bisa dipanggil JS -->
             <script>
                 document.write(`<script id="data-<?= $i ?>" type="application/json"><?= json_encode($row) ?><\/script>`);
             </script>
